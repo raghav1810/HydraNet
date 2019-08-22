@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch.distributions.dirichlet import Dirichlet
 
 class Uncoiler(nn.Module):
   def __init__(self, net_):

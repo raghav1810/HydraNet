@@ -12,7 +12,6 @@ import torch.nn as nn
 import torchvision
 from torchvision import transforms
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch.distributions.dirichlet import Dirichlet
 
 from utils import *
 from models import *
@@ -29,7 +28,8 @@ parser.add_argument("-base-model","--model", help="Base model which is modefied 
 parser.add_argument('-d', '--dataset', default='cifar10')
 parser.add_argument('--split_pt', type=int, help='Point in network where it splits up into heads')
 parser.add_argument('--n_heads', type=int, help='Number of heads')
-# parser.add_argument()
+parser.add_argument('--path', help='path to pretrained weights of base model')
+args = parser.parse_args()
 
 # Prepare and load data
 transform = transforms.Compose([
@@ -51,7 +51,7 @@ else:
     dataloader = torchvision.datasets.CIFAR100
     num_classes = 100
 
-full_train_set = dataloader('/data', train=True, download=True, transform=transform_train)
+full_train_set = dataloader(root='./data', train=True, download=True, transform=transform_train)
 torch.manual_seed(42)
 train_set, val_set = torch.utils.data.random_split(full_train_set, [45000, 5000])
 torch.manual_seed(torch.initial_seed())
@@ -61,7 +61,7 @@ train_gen = torch.utils.data.DataLoader(train_set, batch_size=batch_size, drop_l
 val_gen = torch.utils.data.DataLoader(val_set, batch_size=batch_size, drop_last=True,shuffle=True)
 
 test_gen = torch.utils.data.DataLoader(
-  dataloader('/data', train=False, download=True, transform=transform),
+  dataloader(root='.data', train=False, download=True, transform=transform),
                               batch_size=batch_size, drop_last=True, shuffle=True)
 l = len(train_gen)*batch_size
 l_val = len(val_gen)*batch_size
@@ -79,7 +79,8 @@ def train_heads(net_, lr=0.01, start_epoch=0, epochs=1, optimizer=None, schedule
   sample_wts = net_.sample_wts
 
   for epoch in range(start_epoch, epochs):  # loop over the dataset multiple times
-  	start = time.time()
+
+    start = time.time()
     running_loss = np.zeros(net_.n_heads)
     correct = np.zeros(net_.n_heads)
     batch_no = 0
@@ -129,9 +130,9 @@ def train_heads(net_, lr=0.01, start_epoch=0, epochs=1, optimizer=None, schedule
     # learning rate adjustments
     if scheduler!=None:
     	scheduler.step(avg_loss)
-  
+
   print('Finished Training')
-  
+
   
 def eval_heads(net_, gen):
   net_.eval()
