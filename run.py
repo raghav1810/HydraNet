@@ -1,3 +1,5 @@
+import argparse
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,6 +23,15 @@ from pytorch_classification.models.cifar.densenet import *
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+parser = argparse.ArgumentParser(description="Pytorch HydraNet trainer")
+
+parser.add_argument("-base-model","--model", help="Base model which is modefied into a Hydra type network")
+parser.add_argument('-d', '--dataset', default='cifar10')
+parser.add_argument('--split_pt', type=int, help='Point in network where it splits up into heads')
+parser.add_argument('--n_heads', type=int, help='Number of heads')
+# parser.add_argument()
+
+# Prepare and load data
 transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
@@ -55,6 +66,10 @@ test_gen = torch.utils.data.DataLoader(
 l = len(train_gen)*batch_size
 l_val = len(val_gen)*batch_size
 l_test = len(test_gen)*batch_size
+
+
+hydraDense_model = HydraNet(args.model, n_heads=args.n_heads, split_pt=args.split_pt, num_classes=num_classes).to(device)
+
 
 def train_heads(net_, lr=0.01, start_epoch=0, epochs=1, optimizer=None, scheduler=None):
   net_.train()
