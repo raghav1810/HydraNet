@@ -40,7 +40,7 @@ class Flatten(nn.Module):
         return x
   
 class HydraNet(nn.Module):
-  def __init__(self, model, n_heads=1, split_pt=7, num_classes=10, path=None):
+  def __init__(self, model, n_heads=1, split_pt=7, num_classes=10, batch_size=128, path=None):
     super(HydraNet, self).__init__()
     self.n_heads = n_heads
     self.split_pt = split_pt
