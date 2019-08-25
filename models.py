@@ -3,6 +3,11 @@ import numpy as np
 import torch.nn as nn
 from torch.distributions.dirichlet import Dirichlet
 
+import pytorch_classification
+from pytorch_classification.models.cifar.resnet import *
+from pytorch_classification.models.cifar.preresnet import *
+from pytorch_classification.models.cifar.densenet import *
+
 class Uncoiler(nn.Module):
   def __init__(self, net_):
     super(Uncoiler, self).__init__()
