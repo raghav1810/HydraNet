@@ -17,7 +17,7 @@ import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 from utils import *
 from models import *
-os.rename('pytorch-classification', 'pytorch_classification')
+# os.rename('pytorch-classification', 'pytorch_classification')
 import pytorch_classification
 from pytorch_classification.models.cifar.resnet import *
 from pytorch_classification.models.cifar.preresnet import *
