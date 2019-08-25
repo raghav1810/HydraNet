@@ -119,11 +119,12 @@ class BatchNormWeighted(nn.BatchNorm2d):
 def freeze_body(net_, state=True):
   ct = 0
   for name, child in net_.named_children():
-    if(name == 'layer_2'):
-      break
-    for name2, params in child.named_parameters():
-      params.requires_grad = not state
-      ct += 1
+    for name, child2 in child.named_children():
+      if(name == 'layer_2'):
+        break
+      for param_name, params in child2.named_parameters():
+        params.requires_grad = not state
+        ct += 1
 
 
 def model_breakup(net_):

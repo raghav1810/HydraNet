@@ -40,14 +40,17 @@ class Flatten(nn.Module):
         return x
   
 class HydraNet(nn.Module):
-  def __init__(self, model, n_heads=1, split_pt=7, num_classes=10, batch_size=128, path=None):
+  def __init__(self, model, n_heads=1, split_pt=7, num_classes=10, batch_size=128, sample_wts=None, path=None):
     super(HydraNet, self).__init__()
     self.n_heads = n_heads
     self.split_pt = split_pt
-    self.sample_wts = []
-    for i in range(self.n_heads):
-      self.sample_wts.append(Dirichlet(torch.tensor(np.ones(batch_size))).sample().float().to(device))
-#       self.sample_wts.append(torch.tensor(np.ones(batch_size)*1).float().to(device))
+    if (sample_wts==None):
+      sample_wts = []
+      for i in range(self.n_heads):
+        sample_wts.append(Dirichlet(torch.tensor(np.ones(batch_size))).sample().float().cuda())
+  #       self.sample_wts.append(torch.tensor(np.ones(batch_size)*1).float().to(device))
+    self.sample_wts = sample_wts
+      
     
     model_body = self.model_maker(model, num_classes)  
     if path != None:
