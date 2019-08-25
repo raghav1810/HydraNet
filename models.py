@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 from torch.distributions.dirichlet import Dirichlet
+from utils import *
 
 import pytorch_classification
 from pytorch_classification.models.cifar.resnet import *
