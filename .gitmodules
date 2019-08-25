@@ -1,3 +1,0 @@
-[submodule "pytorch-classification"]
-	path = pytorch-classification
-	url = https://github.com/raghav1810/pytorch-classification
