@@ -88,9 +88,11 @@ if use_cuda:
     torch.cuda.manual_seed_all(args.manualSeed)
 
 best_acc = 0  # best test accuracy
+model = None
 
 def main():
     global best_acc
+    global model
     start_epoch = args.start_epoch  # start from epoch 0 or last checkpoint epoch
 
     if not os.path.isdir(args.checkpoint):
@@ -260,7 +262,7 @@ def train(trainloader, model, criterion, optimizer, epoch, sample_wts, use_cuda)
         end = time.time()
 
         # plot progress
-        bar.suffix  = '({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
+        bar.suffix  = '({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss_avg: {loss:.4f} | top1_avg: {top1: .4f} | top5_avg: {top5: .4f}'.format(
                     batch=batch_idx + 1,
                     size=len(trainloader),
                     data=data_time.avg,
@@ -345,7 +347,10 @@ def save_checkpoint(state, is_best, checkpoint='checkpoint', filename='checkpoin
 
 def adjust_learning_rate(optimizer, epoch):
     global state
+    global model
     if epoch in args.schedule:
+        if epoch==args.schedule[1]:
+          freeze_body(model, False)
         state['lr'] *= args.gamma
         for param_group in optimizer.param_groups:
             param_group['lr'] = state['lr']
