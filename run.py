@@ -304,6 +304,7 @@ def test(testloader, model, criterion, epoch, use_cuda):
             outputs_sum = torch.add(outputs_sum, outputs[i].cuda())
           outputs = outputs_sum/args.n_heads
           loss = criterion(outputs, targets)
+          loss = torch.mean(loss)
 
           # measure accuracy and record loss
           prec1, prec5 = accuracy(outputs.data, targets.data, topk=(1, 5))
@@ -321,18 +322,17 @@ def test(testloader, model, criterion, epoch, use_cuda):
           end = time.time()
 
           # plot progress
-          # bar.suffix  = '({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
-          #             batch=batch_idx + 1,
-          #             size=len(testloader),
-          #             data=data_time.avg,
-          #             bt=batch_time.avg,
-          #             total=bar.elapsed_td,
-          #             eta=bar.eta_td,
-          #             loss=losses.avg,
-          #             top1=top1.avg,
-          #             top5=top5.avg,
-          #             )
-          bar.suffix = "nothing"
+          bar.suffix  = '({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
+                      batch=batch_idx + 1,
+                      size=len(testloader),
+                      data=data_time.avg,
+                      bt=batch_time.avg,
+                      total=bar.elapsed_td,
+                      eta=bar.eta_td,
+                      loss=losses.avg,
+                      top1=top1.avg,
+                      top5=top5.avg,
+                      )
           bar.next()
     bar.finish()
     return (losses.avg, top1.avg)
