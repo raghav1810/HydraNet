@@ -165,6 +165,7 @@ def main():
         start_epoch = checkpoint['epoch']
         model.load_state_dict(checkpoint['state_dict'])
         sample_wts = checkpoint['sample_wts']
+        model._modules['module'].sample_wts = checkpoint['sample_wts']
         optimizer.load_state_dict(checkpoint['optimizer'])
         logger = Logger(os.path.join(args.checkpoint, 'log.txt'), title=title, resume=True)
     else:
@@ -243,7 +244,7 @@ def train(trainloader, model, criterion, optimizer, epoch, sample_wts, use_cuda)
           # measure accuracy and record loss
           prec1, prec5 = accuracy(outputs[head_idx].data, targets.data, topk=(1, 5))
           if float(torch.__version__[:3]) < 0.5:
-              losses.update(loss.data[0], inputs.size(0))
+              losses[head_idx].update(loss.data[0], inputs.size(0))
               top1[head_idx].update(prec1[0], inputs.size(0))
               top5[head_idx].update(prec5[0], inputs.size(0))
           else:
