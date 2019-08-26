@@ -234,6 +234,7 @@ def train(trainloader, model, criterion, optimizer, epoch, sample_wts, use_cuda)
 
         # compute output
         outputs = model(inputs)
+        optimizer.zero_grad()
         for head_idx in range(args.n_heads):
           loss = criterion(outputs[head_idx], targets)
           loss = (loss * sample_wts[head_idx] / sample_wts[head_idx].sum()).sum()
@@ -250,7 +251,6 @@ def train(trainloader, model, criterion, optimizer, epoch, sample_wts, use_cuda)
               top5[head_idx].update(prec5, inputs.size(0))
 
           # compute gradient and do SGD step
-          optimizer.zero_grad()
           loss.backward(retain_graph=True)
         losses_avg.update(sum([h.avg for h in losses])/len(losses), inputs.size(0))
         top1_avg.update(sum([h.avg for h in top1])/len(top1), inputs.size(0))
