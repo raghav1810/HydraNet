@@ -43,8 +43,9 @@ parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--drop', '--dropout', default=0, type=float,
                     metavar='Dropout', help='Dropout ratio')
-parser.add_argument('--schedule', type=int, nargs='+', default=[48, 32, 48],
-                        help='First arg corresponds to when to unfreeze the body. Decrease learning rate at these epochs.')
+parser.add_argument('--schedule', type=int, nargs='+', default=[32, 48],
+                        help='Decrease learning rate at these epochs.')
+parser.add_argument('--unfreeze', type=int, default=1,help='Epoch at which to unfreeze body')
 parser.add_argument('--gamma', type=float, default=0.1, help='LR is multiplied by gamma on schedule.')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
@@ -348,7 +349,7 @@ def save_checkpoint(state, is_best, checkpoint='checkpoint', filename='checkpoin
 def adjust_learning_rate(optimizer, epoch):
     global state
     global model
-    if epoch==args.schedule[0]:
+    if epoch==args.unfreeze:
           freeze_body(model, False)
     if epoch in args.schedule:
         state['lr'] *= args.gamma
