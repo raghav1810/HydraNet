@@ -5,7 +5,7 @@ import time
 import random
 import numpy as np
 
-# import wandb
+import wandb
 
 import torch
 import torch.nn as nn
@@ -52,6 +52,7 @@ parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
 parser.add_argument('--weight-decay', '--wd', default=5e-4, type=float,
                     metavar='W', help='weight decay (default: 1e-4)')
 # Checkpoints
+parser.add_argument("--wandb_name", default='test_project', help="Name of project in wandb")
 parser.add_argument('-c', '--checkpoint', default='checkpoint', type=str, metavar='PATH',
                     help='path to save checkpoint (default: checkpoint)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
@@ -71,7 +72,7 @@ parser.add_argument('--gpu-id', default='0', type=str,
 
 args = parser.parse_args()
 state = {k: v for k, v in args._get_kwargs()}
-
+wandb.init(project=args.wandb_name, name=args.arch+"_"+str(args.n_heads)+"_"+str(args.split_pt), config=args)
 
 # Validate dataset
 assert args.dataset == 'cifar10' or args.dataset == 'cifar100', 'Dataset can only be cifar10 or cifar100.'
@@ -144,12 +145,15 @@ def main():
     print("==> creating model '{}'".format(args.arch))
     model = HydraNet(args.arch, n_heads=args.n_heads, split_pt=args.split_pt, num_classes=num_classes, batch_size=args.train_batch, path=body_path)
     sample_wts = model.sample_wts
+    wandb.watch(model, log='all')
     model = torch.nn.DataParallel(model).cuda()
-#     print(vars(model))
-#     print(model.state_dict().keys())
     freeze_body(model)
     cudnn.benchmark = True
-    print('    Total params: %.2fM' % (sum(p.numel() for p in model.parameters())/1000000.0))
+
+    n_params = sum(p.numel() for p in model.parameters())/1000000.0
+    print('    Total params: %.2fM' % (n_params))
+    wandb.config.update({'No. of parameters': n_params})
+
     criterion = nn.CrossEntropyLoss(reduction='none')
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
 
@@ -194,6 +198,7 @@ def main():
         # save model
         is_best = test_acc > best_acc
         best_acc = max(test_acc, best_acc)
+        wandb.run.summary["best_acc"] = best_acc
         save_checkpoint({
                 'epoch': epoch + 1,
                 'state_dict': model.state_dict(),
@@ -206,6 +211,7 @@ def main():
     logger.close()
     logger.plot()
     savefig(os.path.join(args.checkpoint, 'log.eps'))
+    wandb.save('checkpoint')
 
     print('Best acc:')
     print(best_acc)
@@ -277,6 +283,12 @@ def train(trainloader, model, criterion, optimizer, epoch, sample_wts, use_cuda)
                     )
         bar.next()
     bar.finish()
+    wandb.log({"top1": [h.avg for h in top1], 
+               "top1_avg": top1_avg.avg,
+               "top5": [h.avg for h in top5], 
+               "top5_avg": top5_avg.avg,
+               "losses": [h.avg for h in losses],
+               "losses_avg": losses_avg.avg}, step=epoch)
     return (losses_avg.avg, top1_avg.avg)
 
 def test(testloader, model, criterion, epoch, use_cuda):
@@ -339,6 +351,9 @@ def test(testloader, model, criterion, epoch, use_cuda):
                       )
           bar.next()
     bar.finish()
+    wandb.log({"top1 test": top1.avg, 
+               "top5 test": top5.avg,
+               "losses test": losses.avg}, step=epoch)
     return (losses.avg, top1.avg)
 
 def save_checkpoint(state, is_best, checkpoint='checkpoint', filename='checkpoint.pth.tar'):
