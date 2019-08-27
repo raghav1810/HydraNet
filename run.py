@@ -189,9 +189,11 @@ def main():
 
     # Train and val
     for epoch in range(start_epoch, args.epochs):
+        # lr scheduler and unfreeze body scheduler
         if args.plateauLR==None:
           adjust_learning_rate(optimizer, epoch+1)
-        
+        if epoch==args.unfreeze:
+          freeze_body(model, False)
 
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, args.epochs, state['lr']))
 
@@ -374,9 +376,6 @@ def save_checkpoint(state, is_best, checkpoint='checkpoint', filename='checkpoin
 
 def adjust_learning_rate(optimizer, epoch):
     global state
-    global model
-    if epoch==args.unfreeze:
-          freeze_body(model, False)
     if epoch in args.schedule:
         state['lr'] *= args.gamma
         for param_group in optimizer.param_groups:
