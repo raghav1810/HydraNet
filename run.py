@@ -15,6 +15,7 @@ import torch.optim as optim
 import torch.utils.data as data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from utils import *
 from models import *
 # os.rename('pytorch-classification', 'pytorch_classification')
