@@ -45,6 +45,7 @@ parser.add_argument('--drop', '--dropout', default=0, type=float,
                     metavar='Dropout', help='Dropout ratio')
 parser.add_argument('--schedule', type=int, nargs='+', default=[32, 48],
                         help='Decrease learning rate at these epochs.')
+parser.add_argument('--plateauLR', type=int, default=None, help='Reduce LR on plateu patience')
 parser.add_argument('--unfreeze', type=int, default=1,help='Epoch at which to unfreeze body')
 parser.add_argument('--gamma', type=float, default=0.1, help='LR is multiplied by gamma on schedule.')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
@@ -183,9 +184,14 @@ def main():
         print(' Test Loss:  %.8f, Test Acc:  %.2f' % (test_loss, test_acc))
         return
 
+    if args.plateauLR!=None:
+      scheduler = ReduceLROnPlateau(optimizer, patience=args.plateauLR)
+
     # Train and val
     for epoch in range(start_epoch, args.epochs):
-        adjust_learning_rate(optimizer, epoch)
+        if args.plateauLR==None:
+          adjust_learning_rate(optimizer, epoch+1)
+        
 
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, args.epochs, state['lr']))
 
@@ -194,6 +200,10 @@ def main():
 
         # append logger file
         logger.append([state['lr'], train_loss, test_loss, train_acc, test_acc])
+
+        # reduce lr on plateau if specified
+        if args.plateauLR!=None:
+          scheduler.step(train_loss)
 
         # save model
         is_best = test_acc > best_acc
