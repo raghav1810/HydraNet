@@ -59,6 +59,7 @@ parser.add_argument('-c', '--checkpoint', default='checkpoint', type=str, metava
                     help='path to save checkpoint (default: checkpoint)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
+parser.add_argument('--active_save', default=None, type=int, help='Specify at what intervals to save to wandb')
 # Architecture
 parser.add_argument("-arch","--arch", help="Base model which is modefied into a Hydra type network")
 parser.add_argument('--split_pt', type=int, help='Point in network where it splits up into heads')
@@ -220,6 +221,8 @@ def main():
                 'optimizer' : optimizer.state_dict(),
                 'sample_wts' : sample_wts
             }, is_best, checkpoint=args.checkpoint)
+        if (args.active_save != None) and (epoch%args.active_save == 0):
+          wandb.save('checkpoint')
 
     logger.close()
     logger.plot()
