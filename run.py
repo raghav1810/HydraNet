@@ -222,6 +222,7 @@ def main():
                 'sample_wts' : sample_wts
             }, is_best, checkpoint=args.checkpoint)
         if (args.active_save != None) and (epoch%args.active_save == 0):
+          print("HERE : ", args.active_save)
           wandb.save('checkpoint')
 
     logger.close()
