@@ -127,10 +127,10 @@ def main():
 
 
     trainset = dataloader(root='./data', train=True, download=True, transform=transform_train)
-    trainloader = data.DataLoader(trainset, batch_size=args.train_batch, drop_last=True, shuffle=True, num_workers=args.workers)
+    trainloader = data.DataLoader(trainset, batch_size=args.train_batch, drop_last=False, shuffle=True, num_workers=args.workers)
 
     testset = dataloader(root='./data', train=False, download=False, transform=transform_test)
-    testloader = data.DataLoader(testset, batch_size=args.test_batch, drop_last=True, shuffle=False, num_workers=args.workers)
+    testloader = data.DataLoader(testset, batch_size=args.test_batch, drop_last=False, shuffle=False, num_workers=args.workers)
     body_path = None
     if (args.pretrained_body == True):
       model_name = ""
@@ -261,7 +261,8 @@ def train(trainloader, model, criterion, optimizer, epoch, sample_wts, use_cuda)
         optimizer.zero_grad()
         for head_idx in range(args.n_heads):
           loss = criterion(outputs[head_idx], targets)
-          loss = (loss * sample_wts[head_idx] / sample_wts[head_idx].sum()).sum()
+          loss = (loss * sample_wts[head_idx][:loss.shape[0]] / sample_wts[head_idx][:loss.shape[0]].sum()).sum()
+
 
           # measure accuracy and record loss
           prec1, prec5 = accuracy(outputs[head_idx].data, targets.data, topk=(1, 5))

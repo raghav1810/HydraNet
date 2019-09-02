@@ -93,7 +93,7 @@ class BatchNormWeighted(nn.BatchNorm2d):
       
     def forward(self, x):
       self._check_input_dim(x)
-      y1 = ((x.view(x.size(0), -1)*self.wts[:, None])/self.wts.sum()).reshape(x.shape)
+      y1 = ((x.view(x.size(0), -1)*self.wts[:(x.view(x.size(0), -1)).shape[0], None])/self.wts[:(x.view(x.size(0), -1)).shape[0]].sum()).reshape(x.shape)
       y1 = y1.transpose(0,1)
       y = x.transpose(0,1)
       return_shape = y.shape
