@@ -44,7 +44,7 @@ parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--drop', '--dropout', default=0, type=float,
                     metavar='Dropout', help='Dropout ratio')
-parser.add_argument('--schedule', type=int, nargs='+', default=[32, 48],
+parser.add_argument('--schedule', type=int, nargs='+', default=None,
                         help='Decrease learning rate at these epochs.')
 parser.add_argument('--plateauLR', type=int, default=None, help='Reduce LR on plateu patience')
 parser.add_argument('--unfreeze', type=int, default=1,help='Epoch at which to unfreeze body')
@@ -194,7 +194,7 @@ def main():
         # lr scheduler and unfreeze body scheduler
         if args.plateauLR==None:
           adjust_learning_rate(optimizer, epoch+1)
-        if epoch==args.unfreeze:
+        if (epoch+1)==args.unfreeze:
           freeze_body(model, False)
 
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, args.epochs, state['lr']))
@@ -222,7 +222,6 @@ def main():
                 'sample_wts' : sample_wts
             }, is_best, checkpoint=args.checkpoint)
         if (args.active_save != None) and (epoch%args.active_save == 0):
-          print("HERE : ", args.active_save)
           wandb.save('checkpoint')
 
     logger.close()
