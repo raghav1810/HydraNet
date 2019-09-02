@@ -93,6 +93,8 @@ class BatchNormWeighted(nn.BatchNorm2d):
       
     def forward(self, x):
       self._check_input_dim(x)
+      x = x.cuda(device=gpus[0])
+      self.wts = self.wts.cuda(device=gpus[0])
       y1 = ((x.view(x.size(0), -1)*self.wts[:(x.view(x.size(0), -1)).shape[0], None])/self.wts[:(x.view(x.size(0), -1)).shape[0]].sum()).reshape(x.shape)
       y1 = y1.transpose(0,1)
       y = x.transpose(0,1)
