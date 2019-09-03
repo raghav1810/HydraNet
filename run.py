@@ -75,7 +75,12 @@ parser.add_argument('--gpu-id', default='0', type=str,
 
 args = parser.parse_args()
 state = {k: v for k, v in args._get_kwargs()}
-wandb.init(project=args.wandb_name, name=args.arch+"_"+str(args.n_heads)+"_"+str(args.split_pt), config=args)
+
+wandb_resume = False
+if args.resume:
+  wandb_resume = True 
+
+wandb.init(project=args.wandb_name, name=args.arch+"_"+str(args.n_heads)+"_"+str(args.split_pt), config=args, resume=wandb_resume)
 
 # Validate dataset
 assert args.dataset == 'cifar10' or args.dataset == 'cifar100', 'Dataset can only be cifar10 or cifar100.'
