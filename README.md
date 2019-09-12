@@ -5,6 +5,9 @@ The HydraNet is a neural network architecture that splits into multiple branches
 We use existing state of the art architectures and make modifications to them accordingly. During training, the part of the network lying before these heads (the model body) have their weights frozen, and we train only the heads. After a certain number of epochs we un-freeze the body of the network and continue training.
 
 Details and visualisations of the training runs and models can be found [here](https://app.wandb.ai/raghav1810/hydranet-temp/reports?view=raghav1810%2FReport%20%230).
+
+![Test accuracies graph](https://raw.githubusercontent.com/raghav1810/HydraNet/master/W%26Btest_acc_chart.png)
+
 ### Architectures used
 - Resnet110
 - Preresnet110
