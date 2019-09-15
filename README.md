@@ -31,3 +31,6 @@ Example run:
 python run.py -arch preresnet -d cifar100 --split_pt 50 --n_heads 8 --lr 0.01 --epochs 64  --unfreeze 56 --schedule 48 --train-batch 128 --test-batch 128
 
 ```
+
+### Example
+A torchviz visualization of a resnet with 4 heads (n_heads=4) splitting at point 53 (split_pt=53) in the network would look like [this](https://github.com/raghav1810/HydraNet/blob/master/model_eg_graph.svg)
